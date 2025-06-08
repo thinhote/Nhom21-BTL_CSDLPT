@@ -8,27 +8,6 @@ RROBIN_TABLE_PREFIX = 'rrobin_part'
 def getopenconnection(user='postgres', password='14102004', dbname='csdl_pt'):
     return psycopg2.connect(f"dbname='{dbname}' user='{user}' host='localhost' password='{password}'")
 
-
-# def loadratings(tablename, filepath, conn):
-#     cur = conn.cursor()
-#     cur.execute(f"""
-#         CREATE TABLE IF NOT EXISTS {tablename} (
-#             userid INTEGER,
-#             movieid INTEGER,
-#             rating FLOAT
-#         );
-#     """)
-
-#     with open(filepath, 'r') as file:
-#         for line in file:
-#             tokens = line.strip().split("::")
-#             if len(tokens) >= 3:
-#                 user, movie, rate = int(tokens[0]), int(tokens[1]), float(tokens[2])
-#                 cur.execute(f"INSERT INTO {tablename} VALUES (%s, %s, %s);", (user, movie, rate))
-
-#     conn.commit()
-#     cur.close()
-
 def loadratings(tablename, filepath, conn):
     try:
         cur = conn.cursor()
@@ -73,35 +52,6 @@ def loadratings(tablename, filepath, conn):
 
     except Exception as e:
         print(f'Error in loadratings:', e)
-# def rangepartition(tablename, n, conn):
-#     step = 5.0 / n
-#     cur = conn.cursor()
-
-#     for i in range(n):
-#         part_name = f"{RANGE_TABLE_PREFIX}{i}"
-#         cur.execute(f"""
-#             CREATE TABLE IF NOT EXISTS {part_name} (
-#                 userid INTEGER,
-#                 movieid INTEGER,
-#                 rating FLOAT
-#             );
-#         """)
-
-#         lower = i * step
-#         upper = (i + 1) * step
-#         if i == 0:
-#             condition = f"rating >= {lower} AND rating <= {upper}"
-#         else:
-#             condition = f"rating > {lower} AND rating <= {upper}"
-
-#         cur.execute(f"""
-#             INSERT INTO {part_name}
-#             SELECT * FROM {tablename}
-#             WHERE {condition};
-#         """)
-
-#     conn.commit()
-#     cur.close()
 
 def rangepartition(tablename, n, conn):
     try:
@@ -144,27 +94,6 @@ def rangepartition(tablename, n, conn):
 
     except Exception as e:
         print(f'Error in rangepartition:', e)
-
-# def roundrobinpartition(tablename, n, conn):
-#     cur = conn.cursor()
-#     cur.execute(f"SELECT * FROM {tablename};")
-#     rows = cur.fetchall()
-
-#     for i in range(n):
-#         cur.execute(f"""
-#             CREATE TABLE IF NOT EXISTS {RROBIN_TABLE_PREFIX}{i} (
-#                 userid INTEGER,
-#                 movieid INTEGER,
-#                 rating FLOAT
-#             );
-#         """)
-
-#     for idx, row in enumerate(rows):
-#         dest_table = f"{RROBIN_TABLE_PREFIX}{idx % n}"
-#         cur.execute(f"INSERT INTO {dest_table} VALUES (%s, %s, %s);", row)
-
-#     conn.commit()
-#     cur.close()
 
 def roundrobinpartition(tablename, n, conn):
     try:
